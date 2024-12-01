@@ -48,7 +48,13 @@ Want to bring a new dimension to your Advent of Code solutions? The bevy crate a
 
 ### 1
 ```text
-src/bin/01.rs:52 took 232.5µs.
+Advent of Code 2024 - Day 01
+=== Part 1 ===
+src/bin/01.rs:51 took 278.958µs.
 Result = 1506483
+
+=== Part 2 ===
+src/bin/01.rs:80 took 274.667µs.
+Result = 23126924
 ```
 

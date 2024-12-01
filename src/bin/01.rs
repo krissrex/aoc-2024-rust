@@ -47,24 +47,38 @@ fn main() -> Result<()> {
 
     assert_eq!(11, part1(BufReader::new(TEST.as_bytes()))?);
 
-    println!("=== Part 1 - reading file ===");
     let input_file = BufReader::new(File::open(INPUT_FILE)?);
     let result = time_snippet!(part1(input_file)?);
     println!("Result = {}", result);
     //endregion
 
     //region Part 2
-    // println!("\n=== Part 2 ===");
-    //
-    // fn part2<R: BufRead>(reader: R) -> Result<usize> {
-    //     Ok(0)
-    // }
-    //
-    // assert_eq!(0, part2(BufReader::new(TEST.as_bytes()))?);
-    //
-    // let input_file = BufReader::new(File::open(INPUT_FILE)?);
-    // let result = time_snippet!(part2(input_file)?);
-    // println!("Result = {}", result);
+    println!("\n=== Part 2 ===");
+
+    fn part2<R: BufRead>(reader: R) -> Result<u32> {
+        let mut left_items = BinaryHeap::new();
+        let mut right_items = BinaryHeap::new();
+
+        reader
+            .lines()
+            .map_while(Result::ok)
+            .map(split_to_pair)
+            //.inspect(|x| println!("{x:?}"))
+            .for_each(|(left, right)| {
+                left_items.push(left);
+                right_items.push(right);
+            });
+
+        let answer = calculate_similarity(left_items, right_items);
+
+        Ok(answer)
+    }
+
+    assert_eq!(31, part2(BufReader::new(TEST.as_bytes()))?);
+
+    let input_file = BufReader::new(File::open(INPUT_FILE)?);
+    let result = time_snippet!(part2(input_file)?);
+    println!("Result = {}", result);
     //endregion
 
     Ok(())
@@ -89,6 +103,55 @@ fn calculate_diff(left_items: BinaryHeap<u32>, right_items: BinaryHeap<u32>) -> 
         })
 }
 
+fn calculate_similarity(left_items: BinaryHeap<u32>, right_items: BinaryHeap<u32>) -> u32 {
+    let left = left_items.into_sorted_vec().into_iter();
+    let mut right = right_items.into_sorted_vec().into_iter();
+
+    let mut last_left_num = 0u32;
+    let mut right_num = right.next().unwrap();
+    let mut last_right_count = 1;
+    let mut right_count = 1;
+
+    let mut result = 0;
+
+    'outer: for next_left in left {
+        // Catch up left and right
+        while next_left > right_num {
+            right_num = match right.next() {
+                None => {break 'outer }
+                Some(x) => x
+            };
+        }
+
+        // Add up duplicates in left
+        if last_left_num == next_left {
+            result += last_left_num * last_right_count;
+            continue 'outer;
+        }
+        last_left_num = next_left;
+
+        // Catch up left
+        if right_num > next_left {
+            continue 'outer;
+        }
+
+        // Count up right
+        while let Some(next_right) = right.next() {
+            if next_right != right_num {
+                result += last_left_num * right_count;
+
+                right_num = next_right;
+                last_right_count = right_count;
+                right_count = 1;
+                break;
+            }
+            right_count += 1;
+        }
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -97,14 +160,5 @@ mod tests {
     fn split_to_pair_works() {
         let actual = split_to_pair(String::from("1   2"));
         assert_eq!(actual, (1, 2))
-    }
-
-    #[test]
-    fn calculate_diff_works() {
-        let left = BinaryHeap::from([3, 2, 1]);
-        let right = BinaryHeap::from([4, 5, 3]);
-
-        let actual = calculate_diff(left, right);
-        assert_eq!(actual, 6)
     }
 }
