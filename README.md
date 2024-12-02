@@ -61,8 +61,10 @@ Result = 23126924
 ### 2
 
 ```text
-Advent of Code 2024 - Day 02
-=== Part 1 ===
-src/bin/02.rs:40 took 180.833µs.
+src/bin/02.rs:40 took 416.042µs.
 Result = 213
+
+=== Part 2 ===
+src/bin/02.rs:60 took 1.138375ms.
+Result = 285
 ```
