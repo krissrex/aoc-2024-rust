@@ -58,3 +58,11 @@ src/bin/01.rs:80 took 274.667µs.
 Result = 23126924
 ```
 
+### 2
+
+```text
+Advent of Code 2024 - Day 02
+=== Part 1 ===
+src/bin/02.rs:40 took 180.833µs.
+Result = 213
+```
