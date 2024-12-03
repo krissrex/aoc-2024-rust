@@ -14,6 +14,10 @@ const TEST: &str = "\
 xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 ";
 
+const TEST2: &str = "\
+xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))\
+";
+
 fn main() -> Result<()> {
     start_day(DAY);
 
@@ -42,17 +46,23 @@ fn main() -> Result<()> {
     //endregion
 
     //region Part 2
-    // println!("\n=== Part 2 ===");
-    //
-    // fn part2<R: BufRead>(reader: R) -> Result<usize> {
-    //     Ok(0)
-    // }
-    //
-    // assert_eq!(0, part2(BufReader::new(TEST.as_bytes()))?);
-    //
-    // let input_file = BufReader::new(File::open(INPUT_FILE)?);
-    // let result = time_snippet!(part2(input_file)?);
-    // println!("Result = {}", result);
+    println!("\n=== Part 2 ===");
+
+    fn part2<R: BufRead>(reader: R) -> Result<i32> {
+        let input = reader.lines().map_while(Result::ok).join("");
+
+        let without_dont = remove_dont_sections(input);
+        let answer = find_all_mul(without_dont)
+            .into_iter()
+            .fold(0, |acc, mul| acc + apply_mul(mul));
+        Ok(answer)
+    }
+
+    assert_eq!(48, part2(BufReader::new(TEST2.as_bytes()))?);
+
+    let input_file = BufReader::new(File::open(INPUT_FILE)?);
+    let result = time_snippet!(part2(input_file)?);
+    println!("Result = {}", result);
     //endregion
 
     Ok(())
@@ -71,6 +81,11 @@ fn apply_mul(mul: String) -> i32 {
     let (left, right) = mul.split_once(",").unwrap();
 
     left.parse::<i32>().unwrap() * right.parse::<i32>().unwrap()
+}
+
+fn remove_dont_sections(line: String) -> String {
+    let pattern = Regex::new(r"don't\(\).*?(do\(\)|$)").unwrap();
+    pattern.replace_all(line.as_str(), "").to_string()
 }
 
 #[cfg(test)]
@@ -94,5 +109,19 @@ mod tests {
     fn apply_mul_works() {
         assert_eq!(apply_mul(String::from("mul(1,3)")), 3);
         assert_eq!(apply_mul(String::from("mul(10,100)")), 1000);
+    }
+
+    #[test]
+    fn remove_dont_sections_works() {
+        assert_eq!(
+            remove_dont_sections(String::from("hellodon't()removethisdo() world")),
+            String::from("hello world")
+        );
+        assert_eq!(
+            remove_dont_sections(String::from(
+                r"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
+            )),
+            String::from("xmul(2,4)&mul[3,7]!^?mul(8,5))")
+        );
     }
 }

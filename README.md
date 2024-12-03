@@ -68,3 +68,15 @@ Result = 213
 src/bin/02.rs:60 took 1.138375ms.
 Result = 285
 ```
+
+### 3
+
+```text
+=== Part 1 ===
+src/bin/03.rs:44 took 9.689167ms.
+Result = 180233229
+
+=== Part 2 ===
+src/bin/03.rs:64 took 3.359583ms.
+Result = 95411583
+```
