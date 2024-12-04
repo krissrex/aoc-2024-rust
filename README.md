@@ -80,3 +80,12 @@ Result = 180233229
 src/bin/03.rs:64 took 3.359583ms.
 Result = 95411583
 ```
+
+### 4
+
+```text
+=== Part 1 ===
+src/bin/04.rs:56 took 13.985667ms.
+Result = 2562
+
+```
