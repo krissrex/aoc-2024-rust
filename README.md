@@ -85,7 +85,10 @@ Result = 95411583
 
 ```text
 === Part 1 ===
-src/bin/04.rs:56 took 13.985667ms.
+src/bin/04.rs:56 took 2.400291ms.
 Result = 2562
 
+=== Part 2 ===
+src/bin/04.rs:89 took 1.471458ms.
+Result = 1902
 ```

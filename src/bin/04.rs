@@ -58,17 +58,36 @@ fn main() -> Result<()> {
     //endregion
 
     //region Part 2
-    // println!("\n=== Part 2 ===");
-    //
-    // fn part2<R: BufRead>(reader: R) -> Result<usize> {
-    //     Ok(0)
-    // }
-    //
-    // assert_eq!(0, part2(BufReader::new(TEST.as_bytes()))?);
-    //
-    // let input_file = BufReader::new(File::open(INPUT_FILE)?);
-    // let result = time_snippet!(part2(input_file)?);
-    // println!("Result = {}", result);
+    println!("\n=== Part 2 ===");
+
+    fn part2<R: BufRead>(reader: R) -> Result<i32> {
+        let letters = reader
+            .lines()
+            .map_while(Result::ok)
+            .map(|line| line.chars().collect_vec())
+            .collect_vec();
+        let grid = Grid::from(letters);
+        let mut answer = 0;
+
+        for ((x, y), letter) in grid.indexed_iter() {
+            if *letter == 'A' {
+                let mas_count = explore_mas(&grid, x, y);
+                if mas_count == 2 {
+                    answer += 1;
+                }
+            } else {
+                continue;
+            }
+        }
+
+        Ok(answer)
+    }
+
+    assert_eq!(9, part2(BufReader::new(TEST.as_bytes()))?);
+
+    let input_file = BufReader::new(File::open(INPUT_FILE)?);
+    let result = time_snippet!(part2(input_file)?);
+    println!("Result = {}", result);
     //endregion
 
     Ok(())
@@ -123,6 +142,62 @@ fn explore(grid: &Grid<char>, x: usize, y: usize) -> u32 {
         if grid[search[0]] == 'M' && grid[search[1]] == 'A' && grid[search[2]] == 'S' {
             result += 1;
             //println!("XMAS at {search:?}")
+        }
+    }
+
+    result
+}
+
+fn explore_mas(grid: &Grid<char>, x: usize, y: usize) -> u32 {
+    let mut positions = vec![];
+    for xdir in [-1, 1] {
+        for ydir in [-1, 1] {
+            let mut search = vec![];
+            search.push((x as i32 + xdir, y as i32 + ydir)); // M
+            search.push((x as i32 - xdir, y as i32 - ydir)); // S
+
+            positions.push(search);
+        }
+    }
+
+    let (rows, cols) = grid.size();
+    let positions = positions
+        .into_iter()
+        .filter(|pos| {
+            for (last_x, last_y) in pos {
+                if *last_x >= cols as i32 {
+                    return false;
+                }
+                if *last_x < 0 {
+                    return false;
+                }
+                if *last_y >= rows as i32 {
+                    return false;
+                }
+                if *last_y < 0 {
+                    return false;
+                }
+            }
+            true
+        })
+        .map(|search| {
+            search
+                .into_iter()
+                .map(|(search_x, search_y)| (search_x as usize, search_y as usize))
+                .collect_vec()
+        })
+        .collect_vec();
+
+    //println!("{x}, {y} has valid positions at {positions:?}");
+
+    let mut result = 0;
+    for search in positions {
+        if grid[search[0]] == 'M' && grid[search[1]] == 'S' {
+            result += 1;
+            //println!("XMAS at {search:?}")
+        }
+        if result == 2 {
+            break;
         }
     }
 
